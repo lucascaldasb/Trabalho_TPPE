@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.app.json",
+  "compilerOptions": {
+    "types": ["vite/client", "jest", "@types/jest"],
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node",
+    "verbatimModuleSyntax": false
+  },
+  "include": [
+    "src/**/*",
+    "src/__tests__/**/*"
+  ]
+}
