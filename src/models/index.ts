@@ -1,1 +1,2 @@
-export * from './Time';
+export * from "./Jogo";
+export * from "./Time";
