@@ -66,12 +66,18 @@ O projeto inclui uma suíte completa de testes com Jest:
 ```bash
 # Executar todos os testes
 yarn test
+(ou)
+npm test
 
 # Executar testes em modo watch
 yarn test:watch
+(ou)
+npm test:watch
 
 # Executar testes com cobertura
 yarn test:coverage
+(ou)
+npm test:coverage
 ```
 
 ## 🏗️ Estrutura do Projeto
@@ -108,15 +114,23 @@ src/
 ```bash
 # Instalar dependências
 yarn install
+(ou)
+npm install
 
 # Executar em modo desenvolvimento
 yarn dev
+(ou)
+npm dev
 
 # Build para produção
 yarn build
+(ou)
+npm build
 
 # Preview da build
 yarn preview
+(ou)
+npm preview
 ```
 
 ### Interface Web
