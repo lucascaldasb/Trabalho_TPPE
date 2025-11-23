@@ -1,5 +1,6 @@
 import type { Time, CampeonatoClass} from '../models';
 import { TimeClass } from '../models/Time';
+import { ClassificacaoAteRodadaCalculator } from './ClassificacaoAteRodadaCalculator';
 
 export class ClassificacaoService {
 
@@ -8,51 +9,8 @@ export class ClassificacaoService {
   }
 
   static calcularClassificacaoAteRodada(campeonato: CampeonatoClass, numeroRodada: number): Time[] {
-    // Criar uma cópia dos times para calcular a classificação parcial
-    const timesParciais = campeonato.times.map(time => {
-      const timeParcial = new TimeClass(time.id, time.nome);
-      return timeParcial;
-    });
-
-    // Recalcular estatísticas apenas até a rodada especificada
-    for (let i = 1; i <= numeroRodada; i++) {
-      const rodada = campeonato.getRodada(i);
-      if (rodada) {
-        rodada.jogos.forEach(jogo => {
-          if (jogo.jogado) {
-            const mandante = timesParciais.find(t => t.id === jogo.mandante.id);
-            const visitante = timesParciais.find(t => t.id === jogo.visitante.id);
-            
-            if (mandante && visitante) {
-              let resultadoMandante: 'vitoria' | 'empate' | 'derrota';
-              let resultadoVisitante: 'vitoria' | 'empate' | 'derrota';
-
-              if (jogo.golsMandante > jogo.golsVisitante) {
-                resultadoMandante = 'vitoria';
-                resultadoVisitante = 'derrota';
-              } else if (jogo.golsMandante < jogo.golsVisitante) {
-                resultadoMandante = 'derrota';
-                resultadoVisitante = 'vitoria';
-              } else {
-                resultadoMandante = 'empate';
-                resultadoVisitante = 'empate';
-              }
-
-              mandante.atualizarEstatisticas(jogo.golsMandante, jogo.golsVisitante, resultadoMandante);
-              visitante.atualizarEstatisticas(jogo.golsVisitante, jogo.golsMandante, resultadoVisitante);
-            }
-          }
-        });
-      }
-    }
-
-    // Ordenar pela classificação
-    return timesParciais.sort((a, b) => {
-      if (b.pontos !== a.pontos) return b.pontos - a.pontos;
-      if (b.vitorias !== a.vitorias) return b.vitorias - a.vitorias;
-      if (b.saldoGols !== a.saldoGols) return b.saldoGols - a.saldoGols;
-      return b.golsMarcados - a.golsMarcados;
-    });
+    const calculator = new ClassificacaoAteRodadaCalculator(campeonato, numeroRodada);
+    return calculator.calcular();
   }
 
   static aplicarDesempatePorVitorias(times: Time[]): Time[] {
