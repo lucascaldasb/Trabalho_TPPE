@@ -1,40 +1,64 @@
 import { TimeClass, JogoClass, RodadaClass, CampeonatoClass } from '../models';
 
 export class SorteioService {
-  static sortearJogosRodada(times: TimeClass[], numeroRodada: number, campeonato: CampeonatoClass): RodadaClass {
-    const rodada = new RodadaClass(numeroRodada);
-    const timesDisponiveis = [...times];
-    const jogosJaRealizados = new Set<string>();
 
-    // Criar conjunto de jogos já realizados para evitar duplicatas
+  static conjuntoJogosRealizados(campeonato: CampeonatoClass): Set<string> {
+    const jogosJaRealizados = new Set<string>();
     campeonato.getTodosJogos().forEach(jogo => {
       const chave1 = `${jogo.mandante.id}-${jogo.visitante.id}`;
       const chave2 = `${jogo.visitante.id}-${jogo.mandante.id}`;
       jogosJaRealizados.add(chave1);
       jogosJaRealizados.add(chave2);
     });
+    return jogosJaRealizados;
+  }
 
-    // Algoritmo de sorteio simples
-    while (timesDisponiveis.length >= 2) {
-      // Sortear dois times aleatórios
-      const indiceMandante = Math.floor(Math.random() * timesDisponiveis.length);
-      const mandante = timesDisponiveis.splice(indiceMandante, 1)[0];
+  static sorteiaTimes(times: TimeClass[]): [TimeClass, TimeClass] | null {
+    if (times.length < 2) {
+      return null;
+    }
+    const indiceMandante = Math.floor(Math.random() * times.length);
+    const mandante = times.splice(indiceMandante, 1)[0];
       
-      const indiceVisitante = Math.floor(Math.random() * timesDisponiveis.length);
-      const visitante = timesDisponiveis.splice(indiceVisitante, 1)[0];
+    const indiceVisitante = Math.floor(Math.random() * times.length);
+    const visitante = times.splice(indiceVisitante, 1)[0];
 
-      // Verificar se este jogo já foi realizado
-      const chaveJogo = `${mandante.id}-${visitante.id}`;
-      if (!jogosJaRealizados.has(chaveJogo)) {
-        const jogo = new JogoClass(
+    return [mandante, visitante];
+  }
+
+  static verificaJogoJaRealizado(mandante: TimeClass, visitante: TimeClass, jogosJaRealizados: Set<string>): [boolean, string] {
+    const chave = `${mandante.id}-${visitante.id}`;
+    return [jogosJaRealizados.has(chave), chave];
+  }
+
+  static registrarJogo(numeroRodada: number, mandante: TimeClass, visitante: TimeClass, rodada: RodadaClass, chave : string, jogosJaRealizados: Set<string> ): void {
+    const jogo = new JogoClass(
           `jogo-${numeroRodada}-${rodada.jogos.length + 1}`,
           mandante,
           visitante,
           numeroRodada
         );
         rodada.adicionarJogo(jogo);
-        jogosJaRealizados.add(chaveJogo);
+        jogosJaRealizados.add(chave);
         jogosJaRealizados.add(`${visitante.id}-${mandante.id}`);
+  }
+
+  static sortearJogosRodada(times: TimeClass[], numeroRodada: number, campeonato: CampeonatoClass): RodadaClass {
+    const rodada = new RodadaClass(numeroRodada);
+    const timesDisponiveis = [...times];
+    const jogosJaRealizados = this.conjuntoJogosRealizados(campeonato);
+
+    while (timesDisponiveis.length >= 2) {
+      const resultadoSorteio = this.sorteiaTimes(timesDisponiveis);
+      if (!resultadoSorteio) {
+        break;
+      }
+
+      const [mandante, visitante] = resultadoSorteio;
+      const [jogoOcorreu, chaveJogo] = this.verificaJogoJaRealizado(mandante, visitante, jogosJaRealizados);
+
+      if (!jogoOcorreu) {
+        this.registrarJogo(numeroRodada, mandante, visitante, rodada, chaveJogo, jogosJaRealizados);
       } else {
         // Se o jogo já foi realizado, devolver os times para tentar novamente
         timesDisponiveis.push(mandante, visitante);
