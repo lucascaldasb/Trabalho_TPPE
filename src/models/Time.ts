@@ -1,3 +1,5 @@
+import { EstatisticasTime } from '../services/EstatisticasTime';
+
 export interface Time {
   id: string;
   nome: string;
@@ -13,36 +15,79 @@ export interface Time {
 export class TimeClass implements Time {
   id: string;
   nome: string;
-  pontos: number = 0;
-  vitorias: number = 0;
-  empates: number = 0;
-  derrotas: number = 0;
-  golsMarcados: number = 0;
-  golsSofridos: number = 0;
-  saldoGols: number = 0;
+  private estatisticas: EstatisticasTime;
 
   constructor(id: string, nome: string) {
     this.id = id;
     this.nome = nome;
+    this.estatisticas = new EstatisticasTime();
+  }
+
+  // Getters para manter compatibilidade com a interface Time
+  get pontos(): number {
+    return this.estatisticas.pontos;
+  }
+
+  set pontos(value: number) {
+    this.estatisticas.pontos = value;
+  }
+
+  get vitorias(): number {
+    return this.estatisticas.vitorias;
+  }
+
+  set vitorias(value: number) {
+    this.estatisticas.vitorias = value;
+  }
+
+  get empates(): number {
+    return this.estatisticas.empates;
+  }
+
+  set empates(value: number) {
+    this.estatisticas.empates = value;
+  }
+
+  get derrotas(): number {
+    return this.estatisticas.derrotas;
+  }
+
+  set derrotas(value: number) {
+    this.estatisticas.derrotas = value;
+  }
+
+  get golsMarcados(): number {
+    return this.estatisticas.golsMarcados;
+  }
+
+  set golsMarcados(value: number) {
+    this.estatisticas.golsMarcados = value;
+  }
+
+  get golsSofridos(): number {
+    return this.estatisticas.golsSofridos;
+  }
+
+  set golsSofridos(value: number) {
+    this.estatisticas.golsSofridos = value;
+  }
+
+  get saldoGols(): number {
+    return this.estatisticas.saldoGols;
+  }
+
+  set saldoGols(value: number) {
+    this.estatisticas.saldoGols = value;
   }
 
   atualizarEstatisticas(golsMarcados: number, golsSofridos: number, resultado: 'vitoria' | 'empate' | 'derrota') {
-    this.golsMarcados += golsMarcados;
-    this.golsSofridos += golsSofridos;
-    this.saldoGols = this.golsMarcados - this.golsSofridos;
+    this.estatisticas.atualizar(golsMarcados, golsSofridos, resultado);
+  }
 
-    switch (resultado) {
-      case 'vitoria':
-        this.pontos += 3;
-        this.vitorias += 1;
-        break;
-      case 'empate':
-        this.pontos += 1;
-        this.empates += 1;
-        break;
-      case 'derrota':
-        this.derrotas += 1;
-        break;
-    }
+  /**
+   * Retorna o objeto de estatísticas para casos onde é necessário acesso direto
+   */
+  getEstatisticas(): EstatisticasTime {
+    return this.estatisticas;
   }
 }

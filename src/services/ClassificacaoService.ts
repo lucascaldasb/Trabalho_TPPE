@@ -2,6 +2,9 @@ import type { Time, CampeonatoClass} from '../models';
 import { TimeClass } from '../models/Time';
 import { ClassificacaoAteRodadaCalculator } from './ClassificacaoAteRodadaCalculator';
 
+// Tipo para desempate que requer apenas algumas propriedades
+type TimeParaDesempate = Pick<Time, 'id' | 'nome' | 'pontos' | 'vitorias'>;
+
 export class ClassificacaoService {
 
   static calcularClassificacao(campeonato: CampeonatoClass): TimeClass[] {
@@ -13,13 +16,17 @@ export class ClassificacaoService {
     return calculator.calcular();
   }
 
-  static aplicarDesempatePorVitorias(times: Time[]): Time[] {
-    return [...times].sort((a, b) => b.vitorias - a.vitorias);
+  static aplicarDesempatePorVitorias<T extends TimeParaDesempate>(times: T[]): T[] {
+    return [...times].sort((a, b) => {
+      const vitoriasA = a.vitorias ?? 0;
+      const vitoriasB = b.vitorias ?? 0;
+      return vitoriasB - vitoriasA;
+    });
   }
 
-  static identificarEmpates(classificacao: Time[]): Time[][] {
-    const gruposEmpatados: Time[][] = [];
-    let grupoAtual: Time[] = [];
+  static identificarEmpates<T extends Pick<Time, 'pontos'>>(classificacao: T[]): T[][] {
+    const gruposEmpatados: T[][] = [];
+    let grupoAtual: T[] = [];
     let pontosAtuais = classificacao[0]?.pontos;
 
     classificacao.forEach(time => {
